@@ -300,7 +300,7 @@ function New-NetworkReport {
     return $reportFile
 }
 
-# Export module members
-Export-ModuleMember -Function Get-NetworkStatistics, Get-ConnectionsByPortRange, Get-ConnectionsByProcess, 
-                              Get-SuspiciousConnections, Get-ProcessNetworkUsage, Export-NetworkDataToJson, 
-                              New-NetworkReport
+# Functions exported by dot-sourcing this script
+# Get-NetworkStatistics, Get-ConnectionsByPortRange, Get-ConnectionsByProcess,
+# Get-SuspiciousConnections, Get-ProcessNetworkUsage, Export-NetworkDataToJson,
+# New-NetworkReport
