@@ -1,0 +1,69 @@
+# PowerShell and Windows specific files
+*.ps1xml
+*.psd1
+*.psm1~
+*.tmp
+*.temp
+*.log
+
+# Windows system files
+Thumbs.db
+Desktop.ini
+*.lnk
+
+# Output files and reports
+*.csv
+*.json
+*.html
+*.xml
+Reports/
+Export/
+Logs/
+
+# PowerShell execution policy files
+*.ps1.config
+
+# Visual Studio Code settings
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# Temporary files
+*~
+*.bak
+*.swp
+*.swo
+
+# PowerShell ISE files
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Build artifacts
+bin/
+obj/
+Build/
+Publish/
+
+# Package management
+packages/
+*.nupkg
+
+# PowerShell Gallery artifacts
+*.zip
+
+# User-specific configuration
+config.json
+settings.json
+*.user
+
+# Performance and monitoring files
+*.perfcounter
+*.etl
+
+# Windows Event Logs
+*.evtx
