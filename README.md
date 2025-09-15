@@ -353,11 +353,98 @@ network-monitor/
 - Use specific switches (`-ShowConnections` or `-ShowProcesses`) for faster execution
 - Adjust refresh intervals based on system performance
 
-## Security Notes
+## Security Features
 
-- This script requires network and process information access
-- Run with appropriate privileges for your security requirements
-- Be cautious when exporting sensitive network information
+### Enhanced Security (v1.2.0)
+This version includes comprehensive security enhancements to protect against various attack vectors:
+
+#### Path Traversal Protection
+- **Secure Export Paths**: All file exports are restricted to safe directories (User Profile, C:\Temp, C:\Reports)
+- **Path Validation**: Full path resolution and validation prevent directory traversal attacks
+- **Write Permission Testing**: Automatic verification of write permissions before file operations
+
+#### Input Validation
+- **Parameter Validation**: All user inputs are validated using PowerShell validation attributes
+- **Port Range Validation**: Network port parameters must be within valid ranges (1-65535)
+- **Process Name Sanitization**: Process names are validated to prevent injection attacks
+- **Output Format Restriction**: Only allowed output formats (Table, List, Grid) are accepted
+
+#### HTML Injection Prevention
+- **HTML Sanitization**: All user and system data in HTML reports is properly encoded
+- **Safe Report Generation**: Environment variables are sanitized before inclusion in HTML output
+- **XSS Protection**: Protection against cross-site scripting in generated reports
+
+#### Security Logging
+- **Audit Trail**: All security-relevant events are logged to `%TEMP%\NetworkMonitor_Security.log`
+- **Attack Detection**: Path traversal attempts and validation failures are logged
+- **Operation Tracking**: File exports, report generation, and script execution are tracked
+
+#### File Operation Security
+- **Overwrite Protection**: User confirmation required before overwriting existing files
+- **Secure File Creation**: Proper error handling and permission validation for all file operations
+- **Temporary File Cleanup**: Automatic cleanup of temporary permission test files
+
+### Security Requirements
+
+- **Execution Policy**: Scripts require `RemoteSigned` execution policy or higher
+- **Administrator Privileges**: Recommended for complete process information and performance counters
+- **Network Access**: Scripts require access to network APIs and process information
+- **File Permissions**: Write access to export directories (User Profile, C:\Temp, C:\Reports)
+
+### Security Best Practices
+
+1. **Run with Appropriate Privileges**: Use administrator privileges only when necessary
+2. **Validate Export Paths**: Only export to trusted directories within allowed paths
+3. **Review Security Logs**: Regularly check `%TEMP%\NetworkMonitor_Security.log` for security events
+4. **Handle Reports Securely**: Generated HTML reports include sanitized data but should still be handled securely
+5. **Monitor for Attacks**: Watch for path traversal attempts and validation failures in logs
+
+### Security Testing
+
+The following commands test security protections:
+
+```powershell
+# Test path traversal protection (should fail with security error)
+.\NetworkMonitor.ps1 -ExportPath "C:\Windows\System32" -ShowAll
+
+# Test invalid port range (should fail with validation error)
+. .\NetworkMonitorUtils.ps1
+Get-ConnectionsByPortRange -MinPort 99999 -MaxPort 1
+
+# Test invalid refresh interval (should fail with validation error)
+.\NetworkMonitor.ps1 -RefreshInterval 500
+
+# Test invalid output format (should fail with validation error)
+.\NetworkMonitor.ps1 -OutputFormat "Invalid"
+
+# Test invalid process names (should fail with validation error)
+. .\NetworkMonitorUtils.ps1
+Get-ConnectionsByProcess -ProcessName @("<script>", "../../../etc/passwd")
+```
+
+### Security Log Events
+
+The security log (`%TEMP%\NetworkMonitor_Security.log`) tracks the following events:
+
+- `SCRIPT_STARTED` - Script execution begins with user and system information
+- `EXPORT_PATH_VALIDATED` - Export path successfully validated and secured
+- `PATH_TRAVERSAL_ATTEMPT` - Blocked path traversal attempt with attempted path
+- `FILE_EXPORTED` - File successfully exported with path and details
+- `REPORT_GENERATED` - Report successfully generated with format and path
+- `JSON_EXPORT_STARTED/COMPLETED` - JSON export operations with parameters
+- `SCRIPT_ERROR` - Script execution error with error details
+- `MONITORING_STOPPED` - User interruption of monitoring process
+
+### Security Vulnerability Fixes
+
+This version addresses the following security vulnerabilities identified in the security assessment:
+
+- **HIGH**: Path traversal vulnerability (CVE-like: Path Injection) - Fixed with path validation
+- **HIGH**: HTML injection in report generation (XSS-like) - Fixed with HTML sanitization
+- **MEDIUM**: Information disclosure - Mitigated with secure logging and path restrictions
+- **MEDIUM**: Denial of service potential - Fixed with input validation limits
+- **MEDIUM**: Unsafe file operations - Fixed with secure file operations and overwrite protection
+- **LOW**: Insufficient input validation - Fixed with comprehensive parameter validation
 
 ## Contributing
 
@@ -368,6 +455,18 @@ Feel free to submit issues, feature requests, or pull requests to improve this n
 This project is open source. Feel free to use and modify as needed.
 
 ## Version History
+
+- **v1.2.0**: Major Security Update (CRITICAL)
+  - **FIXED**: Path traversal vulnerability (HIGH SEVERITY)
+  - **FIXED**: HTML injection vulnerability (HIGH SEVERITY)
+  - **ADDED**: Comprehensive input validation for all parameters
+  - **ADDED**: Security logging and audit trail
+  - **ADDED**: HTML sanitization for all report generation
+  - **ADDED**: Secure file operations with overwrite protection
+  - **ADDED**: Path validation restricting exports to safe directories
+  - **ADDED**: Execution policy requirements (#Requires -ExecutionPolicy RemoteSigned)
+  - **IMPROVED**: Error handling and user feedback
+  - **IMPROVED**: DoS protection with refresh interval limits
 
 - **v1.1.0**: Enhanced documentation and utility functions
   - Comprehensive NetworkMonitorUtils.ps1 documentation

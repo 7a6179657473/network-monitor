@@ -82,7 +82,10 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 - Main user-facing functionality should be in `NetworkMonitor.ps1`
 - Advanced/specialized utilities belong in `NetworkMonitorUtils.ps1`
 - Both files use `[CmdletBinding()]` for proper PowerShell cmdlet behavior
+- Both files require `#Requires -ExecutionPolicy RemoteSigned` for security
 - Error handling uses try-catch blocks with informative error messages
+- All user inputs must be validated using PowerShell validation attributes
+- Security logging is implemented in both scripts for audit trails
 
 ### Function Naming Conventions
 - Use PowerShell-approved verbs (Get-, New-, Export-, Test-)
@@ -117,12 +120,46 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 - Use `-ErrorAction SilentlyContinue` when process information might not be available
 - Provide graceful degradation when running without administrator privileges
 - Include meaningful error messages that guide users toward solutions
+- Log security-relevant errors to the security log with appropriate severity levels
 
-## Using NetworkMonitorUtils.ps1
+### Security Guidelines (CRITICAL - v1.2.0)
 
-The `NetworkMonitorUtils.ps1` file contains advanced utility functions that are not automatically available. To use these functions:
+#### Input Validation Requirements
+- **ALL** user inputs MUST be validated using PowerShell validation attributes
+- File paths MUST be validated using `Test-SecureExportPath` function
+- Port ranges MUST use `[ValidateRange(1, 65535)]`
+- Process names MUST be sanitized to prevent injection attacks
+- Output formats MUST use `[ValidateSet()]` to restrict allowed values
 
-```powershell
+#### Path Security Requirements
+- Export paths are restricted to: User Profile, C:\Temp, C:\Reports
+- Path traversal attempts MUST be logged as security events
+- All file operations MUST verify write permissions before execution
+- Temporary files created during permission testing MUST be cleaned up
+
+#### HTML/Output Security
+- All user and system data in HTML reports MUST be sanitized using `ConvertTo-SafeHtml`
+- Environment variables (Computer name, Username) MUST be HTML-encoded
+- No raw user input should ever be directly embedded in HTML output
+
+#### Security Logging Requirements
+- All security-relevant events MUST be logged using `Write-SecurityLog`
+- Path traversal attempts MUST be logged with WARNING level
+- File operations MUST be logged with details (path, size, operation)
+- Script execution start/end MUST be logged with user and system information
+
+#### File Operation Security
+- File overwrites MUST require user confirmation unless `-Force` is specified
+- File operations MUST use secure path validation
+- Export operations MUST handle errors gracefully and log failures
+
+## Dependencies and Requirements
+- Windows PowerShell 5.1 or PowerShell Core 7.x
+- Windows operating system
+- Administrator privileges recommended for complete functionality
+- Access to `Get-NetTCPConnection`, `Get-NetUDPEndpoint`, and `Get-Process` cmdlets
+- ExecutionPolicy must be RemoteSigned or higher
+- Write access to User Profile, C:\Temp, or C:\Reports for exports
 # Dot-source the script to load functions into current session
 . .\NetworkMonitorUtils.ps1
 
